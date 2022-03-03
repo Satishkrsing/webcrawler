@@ -1,0 +1,69 @@
+{% load static %}
+
+<script>
+
+    $(document).ready(function () {
+        var btn_edit = {}
+        var id = null
+        var url_name_id = null
+
+        $("tbody").on("click", ".btn-edit", function () {
+            event.preventDefault();
+            id = $(this).attr("id")
+        })
+        $("tbody").on("click", ".btn-del", function () {
+            event.preventDefault();
+            var del_id = $(this).attr("id")
+            $.ajax({
+                url: "{% url 'delete' %}",
+                method: "POST",
+                data: { 'id': del_id, 'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val() },
+                success: function (data) {
+                    if (data.status == 'save') {
+                        // output = org_name
+                        // $("#org-name-"+id+"").html(output)
+                        // $("#btn-close").click()
+                        // console.log("Data Saved")
+                    }
+                }
+            })
+
+        })
+        $(".btn-save").click(function () {
+            output = ""
+            // console.log("save button clikced")
+            var url_name = $("#url-name").val()
+            var org_name = $("#org-name").val()
+            var csrf = $("input[name=csrfmiddlewaretoken]").val()
+            dt = { id: id, url_name: url_name, org_name: org_name, csrfmiddlewaretoken: csrf }
+            console.log(dt)
+            $.ajax({
+                url: "{% url 'update' %}",
+                method: "POST",
+                data: dt,
+                success: function (data) {
+                    if (data.status == 'save') {
+                        output = org_name
+                        $("#org-name-" + id + "").html(output)
+                        $("#btn-close").click()
+                        console.log("Data Saved")
+                    }
+                }
+            })
+        })
+
+        $("tbody_").on("click", ".btn-del-home", function () {
+            event.preventDefault();
+            var del_id = $(this).attr("id")
+            $.ajax({
+                url: "{% url 'home' %}",
+                method: "POST",
+                data: { 'id': del_id, 'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val() },
+                success: function (data) {
+                    console.log(data)
+                }
+            })
+        })
+    })
+        
+</script>

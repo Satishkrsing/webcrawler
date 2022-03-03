@@ -1,0 +1,112 @@
+
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block content %}
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Save URL Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form class="modal-form">
+                <div class="modal-body">
+
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">URL:</label>
+                        <input type="text" class="form-control" id="url-name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Organization Name:</label>
+                        <textarea class="form-control" id="org-name"></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-close"
+                        data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h1>Home page</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="inputurl" placeholder="Search for...">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="submit">Go!</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="sel1">Select table list:</label>
+            <select class="form-control" id="sel1" name="tablelist">
+                <option>Select table</option>
+                <option>freejobalerts.com</option>
+                <option>sarkariresult.com</option>
+
+            </select>
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="submit">Go!</button>
+            </span>
+        </div>
+        <div class="input-group">
+            <input type="text" class="form-control" name="home_url" value="home_url" placeholder="Search for...">
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="submit">Refresh for Home URL</button>
+            </span>
+        </div>
+    </form>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Sl No</th>
+                <th scope="col">Organization Name</th>
+                <th scope="col">Home URL</th>
+                <th scope="col">Updated date time</th>
+            </tr>
+        </thead>
+
+        {% for obj in object %}
+        <form action="Url_update" method="POST" class="form-sumbit">
+            {% csrf_token %}
+            <tbody id="tbody">
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td id="org-name-{{ obj.id }}">
+                        {{ obj.name }}
+                    </td>
+                    <td id="url-name-id">
+                        <a href="{{ obj.url }}" target="_blank">
+                            {{ obj.url }}
+                        </a>
+                    </td>
+                    <td>{{ obj.updated }}</td>
+                    <td>
+                        <input type="button" value="Edit" id="{{ obj.id }}" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal" data-bs-whatever="@mdo" class="btn btn-primary btn-edit">
+                        <!-- <button value="{{ obj.pk }}" class="btn btn-default" id="{{ obj.pk }}" type="submit">Edit</button> -->
+                    </td>
+
+                    <td>
+                        <button class="btn btn-warning btn-del" id="{{ obj.id }}" type="submit">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </form>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

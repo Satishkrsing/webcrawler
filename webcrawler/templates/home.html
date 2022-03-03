@@ -1,0 +1,215 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block content %}
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Save URL Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form class="modal-form">
+                <div class="modal-body">
+
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">URL:</label>
+                        <input type="text" class="form-control" id="url-name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Organization Name:</label>
+                        <textarea class="form-control" id="org-name"></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-close"
+                        data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h1>Home page</h1>
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="input-group">
+            <label for="sel1">Select table list:</label>
+            <select class="form-control" id="url_table_list" name="tablelist">
+                <option>Select table</option>
+                {% for obj in object %}
+
+                <option>{{ obj.url }}</option>
+                {% endfor %}
+
+            </select>
+            <span class="input-group-btn">
+                <button class="btn btn-default btn-go" type="submit">Go!</button>
+            </span>
+        </div>
+        <div class="input-group">
+            
+            <span class="input-group-btn">
+                <button class="btn btn-default btn-hm-url" type="submit">Refresh for Home URL</button>
+            </span>
+        </div>
+    </form>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Sl No</th>
+                <th scope="col">Organization Name</th>
+                <th scope="col">Home URL</th>
+                <th scope="col">Updated date time</th>
+            </tr>
+        </thead>
+
+        {% for obj in object %}
+        <form action="Url_update" method="POST" class="form-sumbit">
+            {% csrf_token %}
+            <tbody id="tbody_">
+                <!-- <tr> -->
+                <!-- <th scope="row">{{ forloop.counter }}</th>
+                    <td id="org-name-{{ obj.id }}">
+                        {{ obj.name }}
+                    </td>
+                    <td id="url-name-id">
+                        <a href="{{ obj.url }}" target="_blank">
+                            {{ obj.url }}
+                        </a>
+                    </td>
+                    <td>{{ obj.updated }}</td>
+                    <td>
+                        <input type="button" value="Edit" id="{{ obj.id }}" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal" data-bs-whatever="@mdo" class="btn btn-primary btn-edit">
+                         <button value="{{ obj.pk }}" class="btn btn-default" id="{{ obj.pk }}" type="submit">Edit</button> -->
+                <!-- </td>
+
+                    <td>
+                        <button class="btn btn-warning btn-del" id="{{ obj.id }}" type="submit">Delete</button>
+                    </td>  -->
+                <!-- </tr> -->
+            </tbody>
+        </form>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}
+{% block script1 %}
+<script>
+    $(document).ready(function () {
+        var btn_edit = {}
+        var id = null
+        var url_name_id = null
+
+        $("tbody").on("click", ".btn-edit", function () {
+            event.preventDefault();
+            id = $(this).attr("id")
+            console.log(id)
+        })
+        $(".btn-go").click(function () {
+            event.preventDefault();
+            var url = $("#url_table_list").val()
+            console.log(url)
+            $.ajax({
+                url: "{% url 'org_name' %}",
+                method: "POST",
+                data: { 'url': url, 'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val() },
+                success: function (data) {
+                    var output = ""
+                    if ((data.status) == "ok") {
+                        alert("Url updated")
+                    }
+                }
+            })
+        })
+        $(".btn-hm-url").click(function(){
+            event.preventDefault();
+            $.ajax({
+                url: "{% url 'url_short' %}",
+                method: "POST",
+                data: { 'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val() },
+                success: function (data) {
+                    var output = ""
+                    if ((data.status) == "ok") {
+                        var y = JSON.parse(data.dt)
+                        var x = [];
+                        for(var i in y)
+                            x.push(y[i].fields);
+                        console.log(x)
+                        for (i = 0; i < x.length; i++) {
+                            var sl = i + 1
+                            output += "<tr><td>" + sl + "</td><td id='123'> "+x[i].name+" </td><td>" + x[i].url + "</td><td>" + x[i].updated + "</td><td>  <input type='button' data-bs-toggle='modal' data-bs-target='#exampleModal' data-bs-whatever='@mdo' class='btn btn-primary btn-edit' value='Edit'id="+x[i].url+"> </td><td><button class='btn btn-warning btn-del' id="+ x[i]+" type='submit'>Del</button></td></tr>"
+                        }
+                        $("#tbody_").html(output);
+                    }
+                }
+            })
+        })
+        $("#tbody_").on("click", ".btn-del-home", function () {
+            event.preventDefault();
+            var del_id = $(this).attr("id")
+            $.ajax({
+                url: "{% url 'dell' %}",
+                method: "POST",
+                data: { 'btn-del-id': del_id, 'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val() },
+                success: function (data) {
+                    var output = ""
+                    if (data.status == "ok") {
+                        var x = data.url_list
+                        for (i = 0; i < x.length; i++) {
+                            var sl = i + 1
+                            output += "<tr><td><button class='btn btn-danger btn-del-home' id=" + x[i] + " type='button'>Del</button> </td><td>" + sl + "</td><td>" + x[i] + "</td></tr>"
+                        }
+                        $("#tbody_").html(output);
+                    }
+                }
+            })
+        })
+        $(".btn-home-save").click(function () {
+            $.ajax({
+                url: "{% url 'save_home' %}",
+                method: "POST",
+                data: { 'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val() },
+                success: function (data) {
+                    if (data.status == "save") {
+                        alert("URL Saved Successfully")
+                    }
+                }
+            })
+        })
+        $(".btn-save").click(function () {
+            output = ""
+            // console.log("save button clikced")
+            var url_name = $("#url-name").val()
+            var org_name = $("#org-name").val()
+            var csrf = $("input[name=csrfmiddlewaretoken]").val()
+            dt = { id: id, url_name: url_name, org_name: org_name, csrfmiddlewaretoken: csrf }
+            console.log(dt)
+            $.ajax({
+                url: "{% url 'update' %}",
+                method: "POST",
+                data: dt,
+                // console.log()
+                success: function (data) {
+                    if (data.status == 'save') {
+                        output = org_name
+                        $("#123").html(output)
+                        $(".btn-close").click()
+                        console.log("Data Saved")
+                    }
+                }
+            })
+        })
+    })
+</script>
+
+{% endblock %}
